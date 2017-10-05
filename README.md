@@ -33,6 +33,62 @@ Or with using DrRacket IDE.
 (server/run)
 ```
 
+## API
+
+### http/get, http/post, http/delete, http/put
+
+Defines request handler for specified protocol.
+
+Parameters are url as string(with possibility usage of placeholders) and callback function.
+
+Example:
+
+```racket
+(http/get "/article/:id"
+    (λ (req)
+	(let* ((id (request/param 'id)))
+	    (string-append "This is article #" id))))
+```
+
+### request/param
+
+Gets request parameter's value(from get/post or placeholder parameter).
+
+Parameter is name of parameter.
+
+### request/cookie
+
+Gets cookie value.
+
+Parameter is name of cookie.
+
+### response/make
+
+Creates response. It have required parameter content and several rest parameters. 
+
+Default values are: 
+```
+#:code [code 200]
+#:message [message #"OK"]
+#:seconds [seconds (current-seconds)]
+#:mime-type [mime-type TEXT/HTML-MIME-TYPE]
+#:headers [headers (list (make-header #"Cache-Control" #"no-cache"))]
+```
+
+Can be used for creating custom response statuses/placing new headers etc.
+
+### response/404
+
+Response with 404 status. 
+
+### server/set-port
+
+Defines port that's be listened with http server
+
+### server/run
+
+Run's server event loop
+
 ## Credits
 
  * [z-song](https://github.com/z-song/raf/) is author Raf framework(HoLy is created by reading Raf sources).
