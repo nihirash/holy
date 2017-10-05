@@ -37,7 +37,7 @@ Or with using DrRacket IDE.
 
 ### http/get, http/post, http/delete, http/put
 
-Defines request handler for specified protocol.
+Defines request handler for specified request type.
 
 Parameters are url as string(with possibility usage of placeholders) and callback function.
 
