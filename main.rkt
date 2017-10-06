@@ -28,7 +28,7 @@
 ; Cookies hash
 (define cookies (make-hash))
 ; Headers list
-(define headers '())
+(define headers (list (make-header #"Cache-Control" #"no-cache")))
 
 ; Creating empty hash-maps for request handlers
 (map
