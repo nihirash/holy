@@ -15,6 +15,7 @@
          request/param
          request/cookie
          response/add-header
+         response/add-cookie
          response/make
          response/404
          server/run)
@@ -39,6 +40,12 @@
 ; Adds header to http response
 (define (response/add-header header)
   (set! headers (append headers (list header))))
+
+; Creates cookie
+(define (response/add-cookie name value)
+  (response/add-header
+         (cookie->header
+          (make-cookie name value))))
 
 ; Remember request handler
 ; Params are - request method(get/post/put/delete), path("/", "/hello/:id/") and callback
