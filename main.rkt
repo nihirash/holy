@@ -14,6 +14,7 @@
          server/set-port
          request/param
          request/cookie
+         response/add-header
          response/make
          response/404
          server/run)
@@ -36,7 +37,7 @@
  '(get post put delete))
 
 ; Adds header to http response
-(define (http/add-header header)
+(define (response/add-header header)
   (set! headers (append headers header)))
 
 ; Remember request handler
