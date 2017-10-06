@@ -81,7 +81,7 @@
 
   ; Get cookie by name
   (define (request/cookie name)
-    (hash-ref cookies name))
+    (hash-ref cookies name #f))
 
   ; Make response
   (define (response/make #:code [code 200]
