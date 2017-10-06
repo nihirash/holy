@@ -38,7 +38,7 @@
 
 ; Adds header to http response
 (define (response/add-header header)
-  (set! headers (append headers header)))
+  (set! headers (append headers (list header))))
 
 ; Remember request handler
 ; Params are - request method(get/post/put/delete), path("/", "/hello/:id/") and callback
