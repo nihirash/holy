@@ -157,6 +157,7 @@
 (define (server/run)
   (serve/servlet
    (λ (req)
+     (set! headers (list (make-header #"Cache-Control" #"no-cache")))
      (server/response
       (server/find-handler req)
       req))
