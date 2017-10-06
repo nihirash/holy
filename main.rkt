@@ -158,6 +158,7 @@
   (serve/servlet
    (λ (req)
      (set! headers (list (make-header #"Cache-Control" #"no-cache")))
+     (set! cookies (make-hash))
      (server/response
       (server/find-handler req)
       req))
