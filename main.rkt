@@ -96,7 +96,7 @@
                        #:mime-type [mime-type TEXT/HTML-MIME-TYPE]
                        #:headers [headers (cond 
                                             [(empty? headers) (list (make-header #"Cache-Control" #"no-cache"))]
-                                            [(else headers)])]
+                                            [else headers])]
                        content)
   (response/full code
                  message
