@@ -81,6 +81,25 @@ Can be used for creating custom response statuses/placing new headers etc.
 
 Response with 404 status. 
 
+
+### response/add-header
+
+Add's header to response.
+
+```racket
+(define (response/add-header header))
+```
+
+Header must be racket web-server's header.
+
+### response/add-cookie
+
+Add's cookie to response.
+
+```racket
+(define (response/add-cookie name value))
+```
+
 ### server/set-port
 
 Defines port that's be listened with http server
