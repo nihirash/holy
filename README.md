@@ -4,6 +4,10 @@
 
 HoLy is simple a HTTP-server Library for Racket.
 
+**WARNING** Project in alpha state. API is unstable. Sorry.
+
+Pull requests are welcome!
+
 ## Installation
 
 You can install it with using console utillity **raco**:
@@ -60,7 +64,7 @@ Parameter is name of parameter.
 
 Gets cookie value.
 
-Parameter is name of cookie.
+Parameters are request and name of cookie.
 
 ### response/make
 
