@@ -85,12 +85,17 @@
 (define (request/param name)
   (hash-ref params name #f))
 
-; Get cookie value from request
-(define (request/cookie request cookie-name)
-  (findf
-   (λ (cookie)
-     (string=? cookie-name (client-cookie-name cookie)))
-   (request-cookies request)))
+; Parse cookies to hash-map
+(define (server/parse-cookies req)
+  (map (λ (cookie)
+         (hash-set! cookies
+                    (client-cookie-name cookie)
+                    (client-cookie-value cookie)))
+       (request-cookies req)))
+
+; Get cookie by name
+(define (request/cookie name)
+  (hash-ref cookies name #f))
 
 ; Make response
 (define (response/make #:code [code 200]
