@@ -4,6 +4,12 @@
 
 HoLy is simple a HTTP-server Library for Racket.
 
+Sorry, library in **alpha stage**! Be carefull API is unstable!
+
+**Pull requests** are welcome!
+
+We'll make web fucntional again!
+
 ## Installation
 
 You can install it with using console utillity **raco**:
