@@ -4,5 +4,5 @@
 (define build-deps '("scribble-lib" "racket-doc"))
 (define scribblings '(("scribblings/HoLy.scrbl" ())))
 (define pkg-desc "HoLy is HTTP Library")
-(define version "0.1")
+(define version "0.1-dev")
 (define pkg-authors '(nihirash))

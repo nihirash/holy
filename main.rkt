@@ -7,18 +7,7 @@
 (require web-server/servlet
            web-server/servlet-env)
   
-(provide http/get
-         http/post
-         http/delete
-         http/put
-         server/set-port
-         request/param
-         request/cookie
-         response/add-header
-         response/add-cookie
-         response/make
-         response/404
-         server/run)
+(provide (all-defined-out))
 
 ; Request handlers
 (define handlers (make-hash))
@@ -26,10 +15,6 @@
 (define env/port 8000)
 ; HTTP-params hash(for GET/POST etc. vars)
 (define params (make-hash))
-; Cookies hash
-(define cookies (make-hash))
-; Headers list
-(define headers (list (make-header #"Cache-Control" #"no-cache")))
 
 ; Creating empty hash-maps for request handlers
 (map
@@ -37,36 +22,57 @@
    (hash-set! handlers element (make-hash)))
  '(get post put delete))
 
-; Adds header to http response
-(define (response/add-header header)
-  (set! headers (append headers (list header))))
-
-; Creates cookie
-(define (response/add-cookie name value)
-  (response/add-header
-         (cookie->header
-          (make-cookie name value))))
-
 ; Remember request handler
 ; Params are - request method(get/post/put/delete), path("/", "/hello/:id/") and callback
 (define (http/handler method path proc)
   (hash-set! (hash-ref handlers method) path proc))
 
+; Little shugar 
+(define-syntax push!
+  (syntax-rules ()
+   [(push! to what)
+    (set! to (append to (list what)))]))
+
+(define-syntax http
+  (syntax-rules ()
+    [(http method url handler)
+       ((λ()
+           (define headers (list (make-header #"Cache-Control" #"no-cache")))
+           
+           (define (response/add-header header)
+             (push! headers header))
+       
+           (define (response/add-cookie name value)
+             (response/add-header
+              (cookie->header (make-cookie name value))))
+        
+           (http/handler
+            (quote method)
+            url
+            (λ (req)
+              (let ([response (handler req)])
+                (cond
+                  [(response? response)
+                   response]
+                  [else
+                   (response/make response #:headers headers)]))))))]))
+  
+
 ; GET request handler
-(define (http/get path proc)
-  (http/handler 'get path proc))
+;(define (http/get path proc)
+;  (http-handler 'get path proc))
 
 ; POST request handler
-(define (http/post path proc)
-  (http/handler 'post path proc))
+;(define (http/post path proc)
+;  (http-handler 'post path proc))
 
 ; PUT request handler
-(define (http/put path proc)
-  (http/handler 'put path proc))
+;(define (http/put path proc)
+;  (http-handler 'put path proc))
 
 ; DELETE request handler
-(define (http/delete path proc)
-  (http/handler 'delete path proc))
+;(define (http/delete path proc)
+;  (http-handler 'delete path proc))
 
 ; Http path template to regexp translation
 (define (path->regexp path)
@@ -82,24 +88,44 @@
   (set! env/port port))
 
 ; Get request parameter
-(define (request/param name)
+(define (request-get-param name)
   (hash-ref params name #f))
+
+
+(define  (find-cookie request cookie-name)
+  (findf
+    (λ (cookie)
+      (string=? cookie-name (client-cookie-name cookie)))
+    (request-cookies request)))
 
 ; Get cookie value from request
 (define (request/cookie request cookie-name)
-  (findf
-   (λ (cookie)
-     (string=? cookie-name (client-cookie-name cookie)))
-   (request-cookies request)))
+  (let ([cookie (find-cookie request cookie-name)])
+    (cond
+      [cookie (client-cookie-value cookie)]
+      [else #f])))
+
+; Get parameter from request
+(define (request/param request form-field)
+  (let ([param (request-get-param form-field)])
+   (cond
+     [param param]
+     [else
+      (let ([form-val (bindings-assq
+                            (string->bytes/utf-8 form-field)
+                            (request-bindings/raw request))])
+        (cond
+         [form-val (bytes->string/utf-8
+                    (binding:form-value form-val))]
+         [else #f]))])))
+ 
 
 ; Make response
 (define (response/make #:code [code 200]
                        #:message [message #"OK"]
                        #:seconds [seconds (current-seconds)]
                        #:mime-type [mime-type TEXT/HTML-MIME-TYPE]
-                       #:headers [headers (cond 
-                                            [(empty? headers) (list (make-header #"Cache-Control" #"no-cache"))]
-                                            [else headers])]
+                       #:headers [headers (list (make-header #"Cache-Control" #"no-cache"))]                                            
                        content)
   (response/full code
                  message
@@ -135,25 +161,21 @@
       [(#f) (response/404)]
       [else
        (let* ((keys (map
-                     (λ (match) (string->symbol (substring match 2)))
+                     (λ (match) (substring match 2))
                      (regexp-match* #rx"/:([^\\/]+)" handler-key)))
               (pairs
                (for/list ([key keys]
                           [val (cdr (regexp-match (path->regexp handler-key) path))])
                  (cons key val))))
          (set! params (make-hash (append pairs (url-query (request-uri req)))))
-         (server/parse-cookies req)
          (let* ((handler (hash-ref handlers method))
                 (response ((hash-ref handler handler-key #f) req)))
-           (if (response? response)
-               response
-               (response/make ((hash-ref handler handler-key #f) req)))))])))
+           response))])))
+
 ; Runs server
-(define (server/run)
+(define (server/run) 
   (serve/servlet
-   (λ (req)
-     (set! headers (list (make-header #"Cache-Control" #"no-cache")))
-     (set! cookies (make-hash))
+   (λ (req)     
      (server/response
       (server/find-handler req)
       req))
